@@ -12,5 +12,5 @@ Import the component anywhere
 Pass the url as prop
 
 Example:
-```<FilePreview 
-  url={file_url} />```
+```<FilePreview ```
+ ``` url={file_url} />```
