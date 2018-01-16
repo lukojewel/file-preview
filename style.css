@@ -1,0 +1,25 @@
+
+
+
+
+
+.no-padding{padding: 0;}
+.fp-contestAdmin-acordnPDF-wrapper{
+	word-wrap: break-word;
+}
+.fp-contestAdmin-acordnPDF{
+    font-size: 13px;
+    color: rgba(0, 0, 0, 0.8);
+    text-decoration: none;
+}
+.fp-contestAdmin-acordnPDF i{
+    font-size: 64px;
+    padding-bottom: 5px;
+}
+.fp-contestAdmin-acordnPDF-wrapper{
+      word-wrap: break-word;
+}
+.fp-contestAdmin-acordnPDF:focus, .syt-contestAdmin-acordnPDF:hover {
+    color: #ec1260;
+    text-decoration: none; 
+}
