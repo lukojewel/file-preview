@@ -7,8 +7,8 @@ document — and falls back to a download link for anything it can't render inli
 No runtime dependencies.
 
 ```jsx
-import { FilePreview } from '@lukojewel/file-preview';
-import '@lukojewel/file-preview/styles.css'; // optional
+import { FilePreview } from '@evojewel/file-preview';
+import '@evojewel/file-preview/styles.css'; // optional
 
 <FilePreview url={fileUrl} />;
 ```
@@ -16,7 +16,7 @@ import '@lukojewel/file-preview/styles.css'; // optional
 ## Install
 
 ```bash
-npm install @lukojewel/file-preview
+npm install @evojewel/file-preview
 ```
 
 Requires React 17 or newer as a peer dependency.
