@@ -30,6 +30,18 @@ describe('standalone build', () => {
     expect(container.innerHTML).not.toContain('javascript:');
   });
 
+  // The generator used to hard-code its React import line, so adding a hook to
+  // src/ produced a standalone file that called it without importing it. The
+  // package build was fine; only the copy-paste artifact was broken.
+  it('imports every React hook it uses', () => {
+    const declared = /^import\s*\{([^}]*)\}\s*from\s+["']react["']/m.exec(source);
+    const imported = new Set((declared?.[1] ?? '').split(',').map((name) => name.trim()));
+    const used = new Set([...source.matchAll(/\buse[A-Z]\w*/g)].map((match) => match[0]));
+
+    expect([...used].filter((hook) => !imported.has(hook))).toEqual([]);
+    expect(used.size).toBeGreaterThan(0);
+  });
+
   it('imports nothing but React', () => {
     const imports = [...source.matchAll(/^\s*import\s.*?from\s+["']([^"']+)["']/gm)].map(
       (match) => match[1],

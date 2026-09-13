@@ -48,7 +48,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "lint": "eslint .",
-    "verify": "npm run typecheck && npm run lint && npm run test && npm run build && npm run build:check",
+    "verify": "npm run build && npm run typecheck && npm run lint && npm run test && npm run build:check",
     "build:check": "node scripts/build-standalone.mjs --check",
     "prepublishOnly": "npm run verify"
   },

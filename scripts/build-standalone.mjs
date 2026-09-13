@@ -25,7 +25,7 @@ const OUT_CSS = resolve(ROOT, 'standalone/styles.css');
 /** Concatenation order matters: definitions must precede their use. */
 const SOURCES = ['src/fileType.ts', 'src/viewers.ts', 'src/FilePreview.tsx'];
 
-const BANNER = `/*
+const HEADER = `/*
  * FilePreview — the whole component in one file, with no dependencies beyond
  * React itself. Generated from src/; do not edit directly.
  *
@@ -38,8 +38,25 @@ const BANNER = `/*
  *
  * Source, tests and licence: https://github.com/lukojewel/file-preview
  */
-import { useCallback, useEffect, useState } from 'react';
 `;
+
+/**
+ * Collect every React binding the sources import, so the single hoisted import
+ * is derived from the code rather than hand-maintained. Hard-coding this list
+ * once shipped a standalone file that called `useRef` without importing it.
+ */
+function collectReactImports(sources) {
+  const names = new Set();
+  for (const code of sources) {
+    for (const match of code.matchAll(/^import\s*\{([^}]*)\}\s*from\s+["']react["']/gm)) {
+      for (const name of match[1].split(',')) {
+        const trimmed = name.trim();
+        if (trimmed) names.add(trimmed);
+      }
+    }
+  }
+  return [...names].sort();
+}
 
 /** Drop imports of sibling modules — after concatenation they are all local. */
 function stripLocalImports(code) {
@@ -71,8 +88,14 @@ async function transpile(relativePath) {
 }
 
 async function generate() {
+  const rawSources = await Promise.all(
+    SOURCES.map((path) => readFile(resolve(ROOT, path), 'utf8')),
+  );
+  const reactImports = collectReactImports(rawSources);
+  const banner = `${HEADER}import { ${reactImports.join(', ')} } from 'react';\n`;
+
   const parts = await Promise.all(SOURCES.map(transpile));
-  return `${BANNER}\n${parts.join('\n')}`;
+  return `${banner}\n${parts.join('\n')}`;
 }
 
 const isCheck = process.argv.includes('--check');
