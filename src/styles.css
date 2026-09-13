@@ -1,0 +1,143 @@
+/*
+ * Optional styling for FilePreview.
+ *
+ * The component renders correct, usable markup without this file — every rule
+ * here is cosmetic. All selectors are namespaced under `fp-` and none of them
+ * assume a grid framework, so importing this cannot disturb a host layout.
+ */
+
+.fp-root {
+  --fp-radius: 6px;
+  --fp-border: 1px solid rgb(0 0 0 / 12%);
+  --fp-muted: rgb(0 0 0 / 60%);
+  --fp-surface: rgb(0 0 0 / 3%);
+
+  max-width: 100%;
+}
+
+/* Media ------------------------------------------------------------------- */
+
+.fp-image,
+.fp-video {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--fp-radius);
+}
+
+.fp-audio {
+  width: 100%;
+}
+
+.fp-image-trigger {
+  display: block;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: zoom-in;
+  max-width: 100%;
+}
+
+.fp-image-trigger:focus-visible {
+  outline: 2px solid currentcolor;
+  outline-offset: 2px;
+}
+
+/* Documents --------------------------------------------------------------- */
+
+.fp-pdf,
+.fp-office,
+.fp-text {
+  display: block;
+  width: 100%;
+  min-height: 480px;
+  border: var(--fp-border);
+  border-radius: var(--fp-radius);
+  background: #fff;
+}
+
+/* Fallback link ----------------------------------------------------------- */
+
+.fp-fallback {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 16px;
+  max-width: 160px;
+  border: var(--fp-border);
+  border-radius: var(--fp-radius);
+  background: var(--fp-surface);
+  color: inherit;
+  font-size: 13px;
+  text-align: center;
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+
+.fp-fallback:hover,
+.fp-fallback:focus-visible {
+  border-color: currentcolor;
+}
+
+.fp-fallback__icon {
+  color: var(--fp-muted);
+}
+
+.fp-fallback__ext {
+  color: var(--fp-muted);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+}
+
+.fp-fallback--blocked {
+  cursor: not-allowed;
+}
+
+/* Lightbox ---------------------------------------------------------------- */
+
+.fp-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgb(0 0 0 / 80%);
+  cursor: zoom-out;
+}
+
+.fp-lightbox__image {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.fp-lightbox__close {
+  position: absolute;
+  top: 12px;
+  right: 16px;
+  width: 40px;
+  height: 40px;
+  border: 0;
+  border-radius: 50%;
+  background: rgb(255 255 255 / 12%);
+  color: #fff;
+  font-size: 28px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.fp-lightbox__close:hover,
+.fp-lightbox__close:focus-visible {
+  background: rgb(255 255 255 / 24%);
+}
+
+@media (prefers-color-scheme: dark) {
+  .fp-root {
+    --fp-border: 1px solid rgb(255 255 255 / 16%);
+    --fp-muted: rgb(255 255 255 / 60%);
+    --fp-surface: rgb(255 255 255 / 6%);
+  }
+}
