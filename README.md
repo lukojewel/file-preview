@@ -55,11 +55,35 @@ detected as a PDF.
 | `controls` | `boolean` | `true` | Native playback controls on audio/video. |
 | `lightbox` | `boolean` | `true` | Click an image to view it full-screen. |
 | `onError` | `(event) => void` | — | Called when the media element fails to load. |
+| `onEvent` | `(event: FilePreviewEvent) => void` | — | Report what the component did, for your own analytics. |
 | `renderFallback` | `(info: FallbackInfo) => ReactNode` | built-in link | Replace the fallback UI. |
 
 `detectKind`, `getExtension`, `getFileName`, `getMimeType`, `isSafeUrl` and
 `getOfficeViewerUrl` are exported too, if you want the detection logic without
 the component.
+
+## Analytics
+
+The component makes no network requests of its own. If you want to measure how
+previews are used, pass `onEvent` and send it wherever you already send events:
+
+```jsx
+<FilePreview url={fileUrl} onEvent={(event) => analytics.track('file_preview', event)} />
+```
+
+```ts
+{ type: 'render',   kind: 'pdf',    extension: 'pdf' }
+{ type: 'render',   kind: 'office', extension: 'docx', viewer: 'google' }
+{ type: 'fallback', kind: 'unknown', extension: 'zip', reason: 'unsupported-format' }
+{ type: 'error',    kind: 'video',  extension: 'mp4' }
+{ type: 'lightbox-open', kind: 'image', extension: 'png' }
+```
+
+Events carry the file's category and extension and **never the URL or the file
+name** — a preview URL is routinely a signed link to a document whose name and
+location are themselves sensitive. A `render` or `fallback` event fires once per
+outcome, not once per React render, and passing an inline arrow function does not
+cause repeat events.
 
 ## Two things worth knowing
 

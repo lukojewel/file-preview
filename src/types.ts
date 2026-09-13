@@ -81,4 +81,33 @@ export interface FilePreviewProps {
 
   /** Replace the built-in fallback UI for files that cannot be previewed. */
   renderFallback?: (info: FallbackInfo) => ReactNode;
+
+  /**
+   * Report what the component did, for the host application's own analytics.
+   *
+   * The component never makes a network request of its own — this callback is
+   * the only way anything leaves it, and you decide where it goes. Events carry
+   * the file's category and extension, and deliberately carry neither the URL
+   * nor the file name: a preview URL is routinely a signed link to a document
+   * whose name and location are themselves sensitive.
+   */
+  onEvent?: (event: FilePreviewEvent) => void;
+}
+
+/**
+ * Something the component did, reported to `onEvent`.
+ *
+ * `render` fires when a preview is shown, `fallback` when one could not be and a
+ * link was shown instead, `error` when a media element fails to load.
+ */
+export interface FilePreviewEvent {
+  type: 'render' | 'fallback' | 'error' | 'lightbox-open' | 'lightbox-close';
+  /** The category the file resolved to. */
+  kind: FileKind;
+  /** Lower-cased extension without the dot, or `''` when none could be derived. */
+  extension: string;
+  /** Why no inline preview was possible. Present on `fallback` events only. */
+  reason?: FallbackInfo['reason'];
+  /** Which service rendered the document. Present on Office `render` events only. */
+  viewer?: Exclude<OfficeViewer, false>;
 }
