@@ -1,0 +1,77 @@
+{
+  "name": "@lukojewel/file-preview",
+  "version": "1.0.0",
+  "description": "React component for previewing any file from a URL. Zero runtime dependencies.",
+  "license": "MIT",
+  "author": "Jewel Lukose",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lukojewel/file-preview.git"
+  },
+  "homepage": "https://github.com/lukojewel/file-preview#readme",
+  "bugs": "https://github.com/lukojewel/file-preview/issues",
+  "keywords": [
+    "react",
+    "file",
+    "preview",
+    "image",
+    "video",
+    "audio",
+    "pdf",
+    "viewer"
+  ],
+  "type": "module",
+  "sideEffects": [
+    "*.css"
+  ],
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./styles.css": "./dist/styles.css",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "standalone",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsup && node scripts/build-standalone.mjs",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "eslint .",
+    "verify": "npm run typecheck && npm run lint && npm run test && npm run build && npm run build:check",
+    "build:check": "node scripts/build-standalone.mjs --check"
+  },
+  "peerDependencies": {
+    "react": ">=17"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.13.0",
+    "@testing-library/jest-dom": "^6.6.0",
+    "@testing-library/react": "^16.0.0",
+    "@types/node": "^22.7.0",
+    "@types/react": "^18.3.0",
+    "@types/react-dom": "^18.3.0",
+    "eslint": "^9.13.0",
+    "eslint-plugin-react-hooks": "^5.0.0",
+    "jsdom": "^25.0.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "tsup": "^8.3.0",
+    "typescript": "^5.6.0",
+    "typescript-eslint": "^8.10.0",
+    "vitest": "^2.1.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
