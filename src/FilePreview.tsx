@@ -1,7 +1,7 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { detectKind, getExtension, getFileName, getMimeType, isSafeUrl } from './fileType';
 import { getOfficeViewerUrl } from './viewers';
-import type { FallbackInfo, FilePreviewProps } from './types';
+import type { FallbackInfo, FilePreviewEvent, FilePreviewProps } from './types';
 
 function classNames(...values: (string | undefined | false)[]): string {
   return values.filter(Boolean).join(' ');
@@ -107,10 +107,10 @@ export function FilePreview({
   controls = true,
   lightbox = true,
   onError,
+  onEvent,
   renderFallback,
 }: FilePreviewProps) {
   const [isLightboxOpen, setLightboxOpen] = useState(false);
-  const closeLightbox = useCallback(() => setLightboxOpen(false), []);
 
   const safe = isSafeUrl(url);
   const kind = kindOverride ?? detectKind(url);
@@ -118,21 +118,75 @@ export function FilePreview({
   const fileName = fileNameProp ?? (safe ? getFileName(url) : '');
   const label = alt ?? fileName;
 
+  const viewerUrl = safe && kind === 'office' ? getOfficeViewerUrl(url, officeViewer) : null;
+
+  // Resolved before rendering so the outcome can be reported from an effect, and
+  // so every "cannot preview" path leaves through one place.
+  const fallbackReason: FallbackInfo['reason'] | null = !safe
+    ? 'unsafe-url'
+    : kind === 'office' && !viewerUrl
+      ? 'viewer-disabled'
+      : kind === 'unknown'
+        ? 'unsupported-format'
+        : null;
+
+  // Held in a ref so an inline arrow function from the caller does not make the
+  // reporting effect re-run on every render.
+  const onEventRef = useRef(onEvent);
+  useEffect(() => {
+    onEventRef.current = onEvent;
+  });
+
+  const emit = useCallback((event: FilePreviewEvent) => {
+    onEventRef.current?.(event);
+  }, []);
+
+  useEffect(() => {
+    if (fallbackReason) {
+      emit({ type: 'fallback', kind, extension, reason: fallbackReason });
+      return;
+    }
+    emit({
+      type: 'render',
+      kind,
+      extension,
+      ...(kind === 'office' && officeViewer !== false ? { viewer: officeViewer } : {}),
+    });
+  }, [emit, kind, extension, fallbackReason, officeViewer]);
+
+  const openLightbox = useCallback(() => {
+    setLightboxOpen(true);
+    emit({ type: 'lightbox-open', kind, extension });
+  }, [emit, kind, extension]);
+
+  const closeLightbox = useCallback(() => {
+    setLightboxOpen(false);
+    emit({ type: 'lightbox-close', kind, extension });
+  }, [emit, kind, extension]);
+
+  const handleError = useCallback(
+    (event: unknown) => {
+      emit({ type: 'error', kind, extension });
+      onError?.(event);
+    },
+    [emit, kind, extension, onError],
+  );
+
   const renderUnpreviewable = (reason: FallbackInfo['reason']) => {
     const info: FallbackInfo = { url, kind, extension, fileName, reason };
     const content = renderFallback ? renderFallback(info) : <Fallback info={info} />;
     return <div className={classNames('fp-root', 'fp-root--fallback', className)}>{content}</div>;
   };
 
-  // Validate before anything reaches the DOM: an unsafe scheme never becomes an
-  // `src` or `href`, whatever `kind` the caller asked for.
-  if (!safe) return renderUnpreviewable('unsafe-url');
+  // Validation happens before anything reaches the DOM: an unsafe scheme never
+  // becomes an `src` or `href`, whatever `kind` the caller asked for.
+  if (fallbackReason) return renderUnpreviewable(fallbackReason);
 
   const wrapperClass = classNames('fp-root', `fp-root--${kind}`, className);
 
   if (kind === 'image') {
     const image = (
-      <img className="fp-image" src={url} alt={label} loading="lazy" onError={onError} />
+      <img className="fp-image" src={url} alt={label} loading="lazy" onError={handleError} />
     );
 
     return (
@@ -141,7 +195,7 @@ export function FilePreview({
           <button
             type="button"
             className="fp-image-trigger"
-            onClick={() => setLightboxOpen(true)}
+            onClick={openLightbox}
             aria-label={label ? `View ${label} full screen` : 'View image full screen'}
           >
             {image}
@@ -160,7 +214,7 @@ export function FilePreview({
       <div className={wrapperClass}>
         {/* `preload="metadata"` fetches only enough to show duration and a poster
             frame, rather than pulling the whole file on mount. */}
-        <video className="fp-video" controls={controls} preload="metadata" onError={onError}>
+        <video className="fp-video" controls={controls} preload="metadata" onError={handleError}>
           <source src={url} type={mimeType} />
           <Fallback info={{ url, kind, extension, fileName, reason: 'unsupported-format' }} />
         </video>
@@ -171,7 +225,7 @@ export function FilePreview({
   if (kind === 'audio') {
     return (
       <div className={wrapperClass}>
-        <audio className="fp-audio" controls={controls} preload="metadata" onError={onError}>
+        <audio className="fp-audio" controls={controls} preload="metadata" onError={handleError}>
           <source src={url} type={getMimeType(url)} />
           <Fallback info={{ url, kind, extension, fileName, reason: 'unsupported-format' }} />
         </audio>
@@ -192,7 +246,8 @@ export function FilePreview({
   }
 
   if (kind === 'office') {
-    const viewerUrl = getOfficeViewerUrl(url, officeViewer);
+    // `fallbackReason` already returned for a missing viewer; this repeats the
+    // check so the invariant is enforced by the type system rather than assumed.
     if (!viewerUrl) return renderUnpreviewable('viewer-disabled');
 
     return (
