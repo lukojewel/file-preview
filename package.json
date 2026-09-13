@@ -1,5 +1,5 @@
 {
-  "name": "@lukojewel/file-preview",
+  "name": "@evojewel/file-preview",
   "version": "1.0.0",
   "description": "React component for previewing any file from a URL. Zero runtime dependencies.",
   "license": "MIT",
