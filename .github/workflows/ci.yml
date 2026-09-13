@@ -17,6 +17,8 @@ jobs:
       - run: npm ci
       - run: npm run typecheck
       - run: npm run lint
+      # Drift gate first: fail if the committed standalone/ does not match src/,
+      # so the tests below exercise the file that would actually ship.
+      - run: npm run build:check
       - run: npm run test
       - run: npm run build
-      - run: npm run build:check

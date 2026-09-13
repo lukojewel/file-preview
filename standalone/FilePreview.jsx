@@ -11,7 +11,7 @@
  *
  * Source, tests and licence: https://github.com/lukojewel/file-preview
  */
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 // ---------------------------------------------------------------------------
 // src/fileType.ts
